@@ -1,0 +1,62 @@
+void handleRoot() {
+  String html = R"rawliteral(
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>CanSat Dashboard</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <style>
+        body { font-family: Arial; text-align: center; margin-top: 40px; }
+        h1 { color: #444; }
+        .reading { font-size: 1.3rem; margin: 8px; }
+      </style>
+    </head>
+    <body>
+      <h1>ESP32 Sensor Readings</h1>
+
+      <div class="reading" id="bmpTemp">BMP Temp: --</div>
+      <div class="reading" id="pressure">Pressure: --</div>
+      <div class="reading" id="altitude">Altitude: --</div>
+
+      <div class="reading" id="accel">Accel (x,y,z): --</div>
+      <div class="reading" id="gyro">Gyro (x,y,z): --</div>
+      <div class="reading" id="mag">Mag (x,y,z): --</div>
+
+      <script>
+        setInterval(() => {
+          fetch('/data')
+            .then(response => response.json())
+            .then(data => {
+              document.getElementById('bmpTemp').innerHTML = "BMP Temp: " + data.bmp_temp + " °C";
+              document.getElementById('pressure').innerHTML = "Pressure: " + data.pressure + " hPa";
+              document.getElementById('altitude').innerHTML = "Altitude: " + data.altitude + " m";
+              document.getElementById('accel').innerHTML = "Accel (x,y,z): " + data.ax + ", " + data.ay + ", " + data.az;
+              document.getElementById('gyro').innerHTML = "Gyro (x,y,z): " + data.gx + ", " + data.gy + ", " + data.gz;
+              document.getElementById('mag').innerHTML = "Mag (x,y,z): " + data.mx + ", " + data.my + ", " + data.mz;
+            });
+        }, 2000);
+      </script>
+    </body>
+    </html>
+  )rawliteral";
+
+  server.send(200, "text/html", html);
+}
+
+void handleData() {
+  String json = "{";
+  json += "\"bmp_temp\":" + String(bmp_temperature, 2) + ",";
+  json += "\"pressure\":" + String(pressure, 2) + ",";
+  json += "\"altitude\":" + String(altitude, 2) + ",";
+  json += "\"ax\":" + String(ax, 2) + ",";
+  json += "\"ay\":" + String(ay, 2) + ",";
+  json += "\"az\":" + String(az, 2) + ",";
+  json += "\"gx\":" + String(gx, 2) + ",";
+  json += "\"gy\":" + String(gy, 2) + ",";
+  json += "\"gz\":" + String(gz, 2) + ",";
+  json += "\"mx\":" + String(mx, 2) + ",";
+  json += "\"my\":" + String(my, 2) + ",";
+  json += "\"mz\":" + String(mz, 2);
+  json += "}";
+  server.send(200, "application/json", json);
+}
